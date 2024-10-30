@@ -62,11 +62,19 @@ class UploadVideo extends Module
         $id_product = (int)$params['id_product'];
         $token = Tools::getAdminTokenLite('AdminUploadVideo');
     
-        // Vérifie si le formulaire de suppression a été soumis
-        if (Tools::isSubmit('id_product') && Tools::isSubmit('delete_videos')) {
-            $this->deleteAllVideos($id_product);
+
+        if (Tools::isSubmit('id_product') && Tools::isSubmit('selected_video')) {
+            if ($token === Tools::getValue("token")) {
+                $video_dir = '/videos/';
+                $video_path = "/modules/uploadvideo" . $video_dir . Tools::getValue("selected_video");
+
+                $sql = 'INSERT INTO `' . _DB_PREFIX_ . 'product_videos`(id_product, video_path)
+                        VALUES (' . Tools::getValue('id_product') . ', "' . $video_path . '");';
+                        
+                return Db::getInstance()->execute($sql);
+            }
         }
-    
+        
         // Chemin flexible pour accéder au dossier des vidéos
         $video_dir = __DIR__ . '/videos/';
         $videos = [];
@@ -85,8 +93,7 @@ class UploadVideo extends Module
             'id_product' => $id_product,
             'upload_action' => $this->context->link->getAdminLink('AdminUploadVideo'),
             'token' => $token,
-            'videos' => $videos, // Liste des vidéos récupérées
-            'delete_action' => $this->context->link->getAdminLink('AdminUploadVideo'), // Action pour la suppression
+            'videos' => $videos,
         ]);
     
         // Affiche le template
@@ -94,52 +101,21 @@ class UploadVideo extends Module
     }
     
     
-
-
-
-
-
-public function hookDisplayProductAdditionalInfo($params)
-{
-    $id_product = (int)$params['product']['id_product'];
-
-    // Récupère les vidéos associées au produit
-    $videos = Db::getInstance()->executeS('
-        SELECT video_path FROM ' . _DB_PREFIX_ . 'product_videos
-        WHERE id_product = ' . $id_product
-    );
-
-    // Assigner les vidéos au template
-    $this->context->smarty->assign([
-        'product_videos' => $videos,
-    ]);
-
-    return $this->display(__FILE__, 'views/templates/front/productvideos.tpl');
-}
-
-    public function getAvailableVideos()
+    public function hookDisplayProductAdditionalInfo($params)
     {
-        $video_dir = __DIR__ . '/videos/'; 
-        $videos = [];
+        $id_product = (int)$params['product']['id_product'];
 
-        if (is_dir($video_dir)) {
-            foreach (scandir($video_dir) as $file) {
-                if (in_array(pathinfo($file, PATHINFO_EXTENSION), ['mp4', 'avi', 'mov'])) {
-                    $videos[] = $file;
-                }
-            }
-        } else {
-            echo "Le dossier n'existe pas ou le chemin est incorrect.";
-        }
+        // Récupère les vidéos associées au produit
+        $videos = Db::getInstance()->executeS('
+            SELECT video_path FROM ' . _DB_PREFIX_ . 'product_videos
+            WHERE id_product = ' . $id_product
+        );
 
-        return $videos;
+        // Assigner les vidéos au template
+        $this->context->smarty->assign([
+            'product_videos' => $videos,
+        ]);
+
+        return $this->display(__FILE__, 'views/templates/front/productvideos.tpl');
     }
-    
-    public function deleteAllVideos($id_product)
-    {
-        // Supprime toutes les vidéos associées au produit
-        return Db::getInstance()->delete('product_videos', 'id_product = ' . (int)$id_product);
-    }
-
-
 }
