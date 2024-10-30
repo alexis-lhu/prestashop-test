@@ -7,10 +7,4 @@ class AdminUploadVideoController extends ModuleAdminController
         parent::__construct();
         $this->bootstrap = true;
     }
-
-    public function postProcess()
-    {
-        $token = Tools::getAdminTokenLite('AdminUploadVideo');
-        $this->context->smarty->assign('token', $token);
-    }
 }

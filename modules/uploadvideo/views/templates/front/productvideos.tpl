@@ -5,9 +5,7 @@
         <ul>
             {foreach from=$product_videos item=video}
                 <li>
-                    <video style="border-radius: 50%; cursor: pointer;" width="70" height="70" 
-                           src="{$video.video_path}" content="video/mp4" class="expandable-video" 
-                           onclick="expandVideo(this.src)">
+                    <video style="border-radius: 50%; cursor: pointer;" width="70" height="70" src="{$video.video_path}" content="video/mp4" class="expandable-video" onclick="expandVideo(this.src)">
                         Your browser does not support the video tag.
                     </video>
                 </li>
