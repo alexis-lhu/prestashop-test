@@ -1,4 +1,5 @@
 <?php
+
 class AdminUploadVideoController extends ModuleAdminController
 {
     public function __construct()
@@ -9,18 +10,25 @@ class AdminUploadVideoController extends ModuleAdminController
 
     public function postProcess()
     {
-        if (Tools::isSubmit('submitAddproduct_videos')) {
+        // Vérifie si le formulaire de suppression a été soumis
+        if (Tools::isSubmit('submitDeleteAllVideos')) {
             $id_product = (int)Tools::getValue('id_product');
-            $uploaded_files = $_FILES['product_videos'];
+            $this->deleteAllVideos($id_product);
+            $this->confirmations[] = $this->l('All videos have been successfully deleted.');
+        }
+    }
 
-            // Gère les fichiers téléchargés
-            foreach ($uploaded_files['tmp_name'] as $key => $tmp_name) {
-                if ($uploaded_files['error'][$key] == UPLOAD_ERR_OK) {
-                    $file_name = $uploaded_files['name'][$key];
-                    // Déplace le fichier vers le dossier souhaité (par ex. /img/videos/)
-                    move_uploaded_file($tmp_name, _PS_IMG_DIR_ . "videos/{$id_product}_{$file_name}");
-                    // Sauvegarde le chemin en base de données, si nécessaire
-                }
+    private function deleteAllVideos($id_product)
+    {
+        // Supprime les vidéos de la base de données
+        Db::getInstance()->delete('product_videos', 'id_product = ' . (int)$id_product);
+
+        // Optionnel : Supprime les fichiers vidéo du dossier
+        $video_dir = _PS_IMG_DIR_ . 'videos/';
+        $files = glob($video_dir . "{$id_product}_*");
+        foreach ($files as $file) {
+            if (is_file($file)) {
+                unlink($file); // Supprime le fichier
             }
         }
     }

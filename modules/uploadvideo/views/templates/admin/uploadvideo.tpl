@@ -1,11 +1,28 @@
 <div class="panel">
-    <h3>Upload Product Videos</h3>
-    <form action="http://example.com/admin/index.php?controller=AdminUploadVideo" method="post" enctype="multipart/form-data">
-        <input type="hidden" name="id_product" value="123">
+<h3>Select a Product Video</h3>
+    <form action="{$upload_action}" method="post">
+        <input type="hidden" name="id_product" value="{$id_product}">
+        <input type="hidden" name="token" value="{$token}">
+
         <div class="form-group">
-            <label>Select video files to upload</label>
-            <input type="file" name="product_videos[]" multiple="multiple" accept="video/*">
+            <label>Choose a video from the list</label>
+            <select name="selected_video" class="form-control">
+                {if isset($videos) && $videos|@count > 0}
+                    {foreach from=$videos item=video}
+                        <option value="{$video}">{$video}</option>
+                    {/foreach}
+                {else}
+                    <option value="">No videos available</option>
+                {/if}
+            </select>
         </div>
-        <button type="submit" class="btn btn-primary">Upload Videos</button>
+
+        <button type="submit" class="btn btn-primary">Select Video</button>
+    </form>    
+    
+    <form action="{$delete_action}" method="post" onsubmit="return confirm('{l s='Are you sure you want to delete all videos for this product?'|escape:'javascript'}');">
+        <input type="hidden" name="id_product" value="{$id_product}">
+        <input type="hidden" name="token" value="{$token}">
+        <button type="submit" class="btn btn-danger">{l s='Delete All Videos'}</button>
     </form>
 </div>
